@@ -1,0 +1,364 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>마니또 뽑기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one narrow centered column. The name panel comes first; after submit the envelope stage replaces it and the letter slides up out of the pocket. */
+:root {
+  --bg: #EDEFF7;
+  --surface: #FFFFFF;
+  --ink: #2B2E40;
+  --muted: #646880;
+  --line: #D3D7E7;
+  --accent: #5A62B8;
+  --accent-ink: #FFFFFF;
+  --err: #B4343F;
+  --env-back: #C9CEE8;
+  --env-front: #DDE1F3;
+  --env-flap: #E7EAF8;
+  --env-flap-in: #D3D8EE;
+  --env-line: rgba(43, 46, 64, .16);
+  --env-shadow: rgba(43, 46, 64, .18);
+  --paper-ink: #2B2E40;
+  --stamp: #B4343F;
+  --font-display: 'Gaegu', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --font-body: 'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171925;
+    --surface: #222538;
+    --ink: #ECEDF6;
+    --muted: #A3A7BF;
+    --line: #34384F;
+    --accent: #9AA2F0;
+    --accent-ink: #14162A;
+    --err: #FF9CA4;
+    --env-back: #3A3F63;
+    --env-front: #474D78;
+    --env-flap: #535A85;
+    --env-flap-in: #3F4569;
+    --env-line: rgba(255, 255, 255, .16);
+    --env-shadow: rgba(0, 0, 0, .45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171925;
+  --surface: #222538;
+  --ink: #ECEDF6;
+  --muted: #A3A7BF;
+  --line: #34384F;
+  --accent: #9AA2F0;
+  --accent-ink: #14162A;
+  --err: #FF9CA4;
+  --env-back: #3A3F63;
+  --env-front: #474D78;
+  --env-flap: #535A85;
+  --env-flap-in: #3F4569;
+  --env-line: rgba(255, 255, 255, .16);
+  --env-shadow: rgba(0, 0, 0, .45);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 var(--font-body);
+  word-break: keep-all;
+  padding-block: 40px 56px;
+  padding-inline: 16px;
+}
+.wrap {
+  max-width: 420px;
+  margin-inline: auto;
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+  text-align: center;
+}
+.head { display: grid; gap: 8px; justify-items: center; }
+h1 {
+  margin: 0;
+  font: 700 clamp(42px, 13vw, 54px)/1.05 var(--font-display);
+  letter-spacing: .01em;
+  text-wrap: balance;
+}
+.lead { margin: 0; color: var(--muted); max-width: 28ch; text-wrap: balance; }
+
+.panel {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px 20px;
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+.field { display: grid; gap: 8px; }
+.field label { font-weight: 700; font-size: 15px; }
+.field input {
+  font: inherit;
+  font-size: 18px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+}
+.field input::placeholder { color: var(--muted); opacity: .7; }
+.err { margin: 0; color: var(--err); font-size: 14px; }
+.actions { display: grid; gap: 6px; justify-items: stretch; }
+.btn {
+  font: 700 17px/1 var(--font-body);
+  padding: 15px 18px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+.btn[disabled] { opacity: .6; cursor: progress; }
+.btn-text {
+  font: 15px/1 var(--font-body);
+  padding: 12px 8px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.fine { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+input:focus-visible, button:focus-visible, .env:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Envelope stage */
+.stage { --w: min(320px, 86vw); width: 100%; display: grid; justify-items: center; gap: 24px; }
+.env-zone { padding-top: calc(var(--w) * .4); }
+.env {
+  position: relative;
+  width: var(--w);
+  aspect-ratio: 3 / 2;
+  perspective: 900px;
+  cursor: pointer;
+  filter: drop-shadow(0 12px 16px var(--env-shadow));
+  -webkit-tap-highlight-color: transparent;
+}
+.env-back { position: absolute; inset: 0; background: var(--env-back); border-radius: 8px; z-index: 0; }
+.env-front {
+  position: absolute; inset: 0;
+  background: var(--env-front);
+  border-radius: 8px;
+  clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+  z-index: 3;
+}
+.env-front svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.env-front path { fill: none; stroke: var(--env-line); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.flap {
+  position: absolute; left: 0; right: 0; top: 0; height: 55%;
+  background: var(--env-flap);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top center;
+  z-index: 4;
+  transition: transform .6s ease, background-color .6s ease, z-index 0s .3s;
+}
+.env.open .flap { transform: rotateX(180deg); background: var(--env-flap-in); z-index: 1; }
+.env:not(.open) .flap { transition-delay: .9s, .9s, 1.2s; }
+
+.letter {
+  --paper: #FFFFFF;
+  position: absolute; left: 7%; right: 7%; top: 7%; height: 92%;
+  background: var(--paper);
+  color: var(--paper-ink);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .14), inset 0 0 0 5px rgba(255, 255, 255, .38);
+  padding: 20px 14px 0;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  text-align: center;
+  z-index: 2;
+  transition: transform 1s cubic-bezier(.22, .8, .3, 1) .5s;
+}
+.env.open .letter { transform: translateY(-68%); }
+.env:not(.open) .letter { transition-delay: 0s; }
+.l-kicker { margin: 0; font-size: 14px; opacity: .8; }
+.l-name {
+  margin: 0;
+  font: 700 clamp(40px, 13vw, 50px)/1.1 var(--font-display);
+  text-wrap: balance;
+}
+.l-note { margin: 4px 0 0; font-size: 13px; opacity: .75; }
+.stamp {
+  position: absolute; top: 10px; right: 10px;
+  transform: rotate(12deg);
+  border: 2px solid var(--stamp);
+  color: var(--stamp);
+  border-radius: 6px;
+  padding: 0 8px;
+  font: 700 15px/1.5 var(--font-display);
+  letter-spacing: .08em;
+}
+.env-to {
+  position: absolute; left: 0; right: 0; bottom: 8%;
+  text-align: center;
+  font: 700 clamp(24px, 7.5vw, 30px)/1.1 var(--font-display);
+  color: var(--ink);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.copy { display: grid; gap: 6px; max-width: 30ch; min-height: 3.3em; align-content: start; }
+.copy p { margin: 0; text-wrap: balance; }
+.copy .hint { color: var(--muted); }
+.copy strong { font: 700 22px/1.2 var(--font-display); }
+
+@media (prefers-reduced-motion: reduce) {
+  .flap, .letter { transition-duration: .01s !important; transition-delay: 0s !important; }
+}
+</style>
+
+<main class="wrap">
+  <header class="head">
+    <h1>마니또 뽑기</h1>
+    <p class="lead">이름을 입력하면 내가 몰래 챙겨줄 사람이 봉투에 담겨 나와요.</p>
+  </header>
+
+  <section class="panel" id="entry">
+    <form id="form" class="field" autocomplete="off" novalidate>
+      <label for="name">내 이름</label>
+      <input id="name" name="name" type="text" placeholder="이름을 입력하세요" inputmode="text" enterkeyhint="go" maxlength="12">
+      <p class="err" id="err" role="alert" hidden></p>
+      <div class="actions">
+        <button class="btn" id="go" type="submit">봉투 받기</button>
+      </div>
+    </form>
+    <p class="fine">본인 이름만 입력해 주세요. 다른 사람 이름을 넣으면 그 사람의 결과가 보여요.</p>
+  </section>
+
+  <section class="stage" id="stage" hidden>
+    <div class="env-zone">
+      <div class="env" id="env" role="button" tabindex="0" aria-expanded="false" aria-label="봉투 열기">
+        <div class="env-back"></div>
+        <div class="letter" id="letter">
+          <p class="l-kicker">내가 몰래 챙겨줄 사람은</p>
+          <p class="l-name" id="target"></p>
+          <p class="l-note">다른 사람에게는 비밀이에요.</p>
+        </div>
+        <div class="env-front">
+          <svg viewBox="0 0 300 200" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 200 L150 110 L300 200"></path>
+            <path d="M0 0 L150 110 L300 0"></path>
+          </svg>
+        </div>
+        <div class="flap"></div>
+        <div class="env-to" id="to"></div>
+      </div>
+    </div>
+    <div class="copy" aria-live="polite">
+      <p class="hint" id="hint">봉투를 눌러 열어보세요.</p>
+      <p id="result" hidden></p>
+    </div>
+    <button class="btn-text" id="again" type="button">처음으로</button>
+  </section>
+</main>
+
+<script>
+const DATA = {"names":["설아","수정","서은","채린","재희","하원","현서"],"iter":200000,"salt":"BvsIoE+C4cvBFC9OCc5eBA==","box":{"채린":{"iv":"QKWVGnmxYV2np6OG","ct":"PFDDMfWWc5h2dbwxQRrn8oY/Ygy+cA=="},"현서":{"iv":"N93o7seuSikntpCh","ct":"HQ70EHHH3pq3eNNN55TxGkMq2g9o5A=="},"수정":{"iv":"F0dyKOOSDdbKXkf6","ct":"xsyWMEMQSF8uem2eJSEtAxBaz6uiwQ=="},"재희":{"iv":"Zkv643bDoZfd41jx","ct":"LbwSb03OwitSaeGV0kdXvhw2Wg0dZg=="},"서은":{"iv":"HqVmDSRr//OWGQWi","ct":"BCXHodydG3imKNv6Jpkzhho0V1uCJg=="},"설아":{"iv":"huZ70kX9dfFQxXHp","ct":"+cN8kq4Bop/xJtwD+d5gmyBZO+Jd5g=="},"하원":{"iv":"u8OMatF/J4BMeXu3","ct":"Tx8fDsU6SNZ49/xxsD5FAyYMrlFSfw=="}}};
+
+// CORE-START
+function b64(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
+async function decryptFor(name) {
+  const enc = new TextEncoder();
+  const material = await crypto.subtle.importKey('raw', enc.encode(name), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: b64(DATA.salt), iterations: DATA.iter, hash: 'SHA-256' },
+    material, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+  const box = DATA.box[name];
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64(box.iv) }, key, b64(box.ct));
+  return new TextDecoder().decode(plain);
+}
+// CORE-END
+
+const PAPER = {
+  '설아': '#F5AEB8', // 빨강
+  '수정': '#F9C99C', // 주황
+  '서은': '#F9EDA0', // 노랑
+  '채린': '#B8E2B5', // 초록
+  '재희': '#A9D3F5', // 파랑
+  '하원': '#8FA0D6', // 남색
+  '현서': '#D2B9EC'  // 보라
+};
+
+const el = function (id) { return document.getElementById(id); };
+const entry = el('entry'), stage = el('stage'), form = el('form'), nameInput = el('name');
+const err = el('err'), env = el('env'), letter = el('letter'), hint = el('hint'), result = el('result');
+const goBtn = el('go');
+
+function showError(msg) { err.textContent = msg; err.hidden = !msg; }
+function normName(v) { return v.normalize('NFC').replace(/\s+/g, ''); }
+function setBusy(busy) {
+  goBtn.disabled = busy;
+  goBtn.textContent = busy ? '여는 중…' : '봉투 받기';
+}
+function setOpen(open) {
+  env.classList.toggle('open', open);
+  env.setAttribute('aria-expanded', String(open));
+  env.setAttribute('aria-label', open ? '봉투 닫기' : '봉투 열기');
+  hint.hidden = open;
+  result.hidden = !open;
+}
+function openStage(me, target) {
+  el('target').textContent = target;
+  el('to').textContent = 'To. ' + me;
+  letter.style.setProperty('--paper', PAPER[target]);
+  result.replaceChildren();
+  const s = document.createElement('strong');
+  s.textContent = target;
+  result.append('내 마니또 상대는 ', s, ' 님이에요. 다른 사람에게는 비밀로 해 주세요.');
+  setOpen(false);
+  entry.hidden = true;
+  stage.hidden = false;
+  window.scrollTo(0, 0);
+}
+async function start() {
+  showError('');
+  const me = normName(nameInput.value);
+  if (!me) { showError('이름을 입력해 주세요.'); return; }
+  if (DATA.names.indexOf(me) < 0) { showError('명단에 없는 이름이에요. 이름을 다시 확인해 주세요.'); return; }
+  setBusy(true);
+  try {
+    const target = await decryptFor(me);
+    if (!PAPER[target]) throw new Error('unknown target');
+    openStage(me, target);
+  } catch (e) {
+    showError('이 브라우저에서는 봉투를 열 수 없어요. 다른 브라우저에서 다시 열어 주세요.');
+  } finally {
+    setBusy(false);
+  }
+}
+
+form.addEventListener('submit', function (e) { e.preventDefault(); start(); });
+env.addEventListener('click', function () { setOpen(!env.classList.contains('open')); });
+env.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(!env.classList.contains('open')); }
+});
+el('again').addEventListener('click', function () {
+  setOpen(false);
+  el('target').textContent = '';
+  el('to').textContent = '';
+  stage.hidden = true;
+  entry.hidden = false;
+  nameInput.value = '';
+  showError('');
+  nameInput.focus();
+});
+</script>
+
+</body></html>
